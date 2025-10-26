@@ -2,13 +2,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Roue interactive – v7 (overlay persistant + close)</title>
+<title>Le modèle social français, la roue de la fortune</title>
 <style>
   :root { --bg:#f7f7f7; --fg:#111; --ring:#e5e7eb; }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif;}
   .wrap{min-height:100%;display:grid;place-items:center;padding:16px;}
   .container{width:min(92vw,650px);display:grid;gap:10px;justify-items:center;}
-  h1{margin:0;font-size:clamp(14px,2.4vw,18px);font-weight:700;letter-spacing:.2px;text-transform:none;}
+  h1{margin:0;font-size:clamp(10px,5vw,25px);font-weight:700;letter-spacing:.2px;text-transform:none;}
   .board{background:#fff;border:1px solid var(--ring);border-radius:10px;padding:10px;display:grid;gap:8px;justify-items:center;}
   .wheel-area{position:relative; width:100%; display:grid; place-items:center;}
   /* Pointer at the TOP, rotated so the triangle visually points downward */
@@ -44,7 +44,7 @@
 <body>
 <div class="wrap">
   <div class="container">
-    <h1>modèle social français</h1>
+    <h1>Le modèle social français, la roue de la fortune</h1>
     <div class="board">
       <div class="wheel-area">
         <div class="pointer"></div>
@@ -99,8 +99,7 @@ function computeFont(n){
   return 11;
 }
 
-// ===== Draw wheel =====
-function drawWheel(a){
+function drawWheel(a, showLabels = true){
   ctx.clearRect(0,0,W,H);
   const n = ENTRIES.length;
   if(n===0){ return; }
@@ -125,27 +124,29 @@ function drawWheel(a){
     }
   }
 
-  // Labels
-  const fontPx = computeFont(n);
-  ctx.fillStyle = "#111";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = `${fontPx}px Helvetica, Arial, sans-serif`;
-  const labelRadius = R*0.78;
-  for(let i=0;i<n;i++){
-    const mid = (i+0.5)*step;
-    const x = Math.cos(mid)*labelRadius;
-    const y = Math.sin(mid)*labelRadius;
-    const raw = String(ENTRIES[i] ?? "");
-    const label = raw.length>36 ? raw.slice(0,36)+"…" : raw;
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.rotate(mid);
-    ctx.fillText(label,0,0);
-    ctx.restore();
+  // ✅ On ne dessine les labels que si demandé
+  if (showLabels) {
+    const fontPx = computeFont(n);
+    ctx.fillStyle = "#111";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `${fontPx}px Helvetica, Arial, sans-serif`;
+    const labelRadius = R*0.78;
+    for(let i=0;i<n;i++){
+      const mid = (i+0.5)*step;
+      const x = Math.cos(mid)*labelRadius;
+      const y = Math.sin(mid)*labelRadius;
+      const raw = String(ENTRIES[i] ?? "");
+      const label = raw.length>36 ? raw.slice(0,36)+"…" : raw;
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(mid);
+      ctx.fillText(label,0,0);
+      ctx.restore();
+    }
   }
 
-  // Center cap
+  // Centre
   ctx.beginPath();
   ctx.arc(0,0,R*0.12,0,Math.PI*2);
   ctx.fillStyle = "#fff";
@@ -232,7 +233,7 @@ function spin(){
     const t = Math.min(1, (ts - start) / duration);
     const eased = easeInOutCubic(t);
     angle = -Math.PI/2 + eased * totalAngle;
-    drawWheel(angle);
+    drawWheel(angle, false);
 
     // Segment crossing ping (throttled)
     const idx = getSelectedIndex(angle);
@@ -255,7 +256,7 @@ function spin(){
       angle = -Math.PI/2;
       colors = buildColors(ENTRIES.length);
       document.getElementById('countInfo').textContent = ENTRIES.length + " éléments restants";
-      drawWheel(angle);
+      drawWheel(angle, true);
       btn.disabled = ENTRIES.length===0;
       spinning = false;
     }
