@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Roue interactive – v7 (optimisée avec canvas hors écran)</title>
+<title>Le modèle social français, la roue de la fortune</title>
 <style>
   :root { --bg:#f7f7f7; --fg:#111; --ring:#e5e7eb; }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif;}
@@ -41,7 +41,7 @@
 <body>
 <div class="wrap">
   <div class="container">
-    <h1>modèle social français</h1>
+    <h1>Le modèle social français, la roue de la fortune</h1>
     <div class="board">
       <div class="wheel-area">
         <div class="pointer"></div>
@@ -246,7 +246,6 @@ function spin(){
 
       // Supprime le gagnant
       ENTRIES.splice(winnerIdx,1);
-      angle = -Math.PI/2;
       colors = buildColors(ENTRIES.length);
       buildStaticWheel();
       document.getElementById('countInfo').textContent = ENTRIES.length + " éléments restants";
