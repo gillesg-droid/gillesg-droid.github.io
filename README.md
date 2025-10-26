@@ -1,5 +1,11 @@
 <html lang="fr">
 <head>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ribbon = document.querySelector('.github-fork-ribbon');
+    if (ribbon) ribbon.style.display = 'none';
+  });
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Roue interactive – v7 (overlay persistant + close)</title>
