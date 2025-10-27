@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Roue interactive – version fluide et stable</title>
+<title>Roue interactive – avec sons et couleurs alternées</title>
 <style>
   :root { --bg:#f7f7f7; --fg:#111; --ring:#e5e7eb; }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif;}
@@ -70,7 +70,7 @@ const W = canvas.width, H = canvas.height;
 const CX = W/2, CY = H/2;
 const R = Math.min(W,H)*0.48;
 
-// --- Canvas hors écran (roue statique) ---
+// --- Canvas hors écran ---
 const offscreen = document.createElement('canvas');
 offscreen.width = W;
 offscreen.height = H;
@@ -82,10 +82,9 @@ let colors = [];
 let lastPointerIndex = null;
 let lastPingTime = 0;
 
-/* -------- Fonctions utilitaires -------- */
+/* -------- Couleurs alternées -------- */
 function buildColors(n){
-  // Palette de couleurs contrastées
-  const baseColors = [
+  const palette = [
     "#f87171", // rouge clair
     "#60a5fa", // bleu clair
     "#facc15", // jaune
@@ -94,11 +93,11 @@ function buildColors(n){
     "#fb923c"  // orange
   ];
   const arr = [];
-  for(let i=0;i<n;i++){
-    arr.push(baseColors[i % baseColors.length]); // alternance visible
-  }
+  for(let i=0;i<n;i++) arr.push(palette[i % palette.length]);
   return arr;
 }
+
+/* -------- Font -------- */
 function computeFont(n){
   if(n>340) return 7;
   if(n>260) return 8;
@@ -107,7 +106,7 @@ function computeFont(n){
   return 11;
 }
 
-/* -------- Dessin de la roue statique -------- */
+/* -------- Roue statique -------- */
 function buildStaticWheel(){
   offctx.clearRect(0,0,W,H);
   const n = ENTRIES.length;
@@ -160,7 +159,7 @@ function buildStaticWheel(){
   offctx.restore();
 }
 
-/* -------- Affichage de la roue -------- */
+/* -------- Affichage -------- */
 function drawWheel(a){
   ctx.clearRect(0,0,W,H);
   ctx.save();
@@ -170,7 +169,7 @@ function drawWheel(a){
   ctx.restore();
 }
 
-/* -------- Calcul du secteur sélectionné -------- */
+/* -------- Sélection -------- */
 function getSelectedIndex(a){
   const n=ENTRIES.length;
   const step=(Math.PI*2)/n;
@@ -192,87 +191,83 @@ function showOverlay(text){
 }
 overlayClose.addEventListener('click',()=>overlay.style.display='none');
 
-/* -------- Audio -------- */
-let audioCtx=null;
-function ensureAudio(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();}
-function ping(){try{
-  ensureAudio();const t=audioCtx.currentTime;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.type="sine";o.frequency.value=1000+Math.random()*120;
-  g.gain.value=0.04;g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
-  o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+0.1);
-}catch(e){}}
-function coin(){try{
-  ensureAudio();const t=audioCtx.currentTime;
-  const o1=audioCtx.createOscillator(),g1=audioCtx.createGain();
-  o1.type="triangle";o1.frequency.value=1500;
-  g1.gain.value=0.08;g1.gain.exponentialRampToValueAtTime(0.0001,t+0.25);
-  o1.connect(g1);g1.connect(audioCtx.destination);o1.start(t);o1.stop(t+0.27);
-}catch(e){}}
+/* -------- Nouveaux sons -------- */
+let spinSound = new Audio("wheel-spin.mp3");
+let coinSound = new Audio("coin.mp3");
+spinSound.loop = true;
+spinSound.volume = 0.7;
+coinSound.volume = 0.9;
+
+function playSpinSound(){
+  spinSound.currentTime = 0;
+  spinSound.play().catch(()=>{});
+}
+function stopSpinSound(){
+  spinSound.pause();
+  spinSound.currentTime = 0;
+}
+function playCoinSound(){
+  coinSound.currentTime = 0;
+  coinSound.play().catch(()=>{});
+}
 
 /* -------- Animation du spin -------- */
 function spin(){
   if(spinning) return;
-  if(ENTRIES.length===0){ alert("Plus aucun élément à tirer."); return; }
-  spinning = true;
-  const btn = document.getElementById('spinBtn');
-  btn.disabled = true;
+  if(ENTRIES.length===0){alert("Plus aucun élément à tirer.");return;}
+  spinning=true;
+  const btn=document.getElementById('spinBtn');
+  btn.disabled=true;
 
-  // --- capture l'angle de départ (position actuelle de la roue)
-  const startAngle = angle;
+  const startAngle = angle; // point de départ réel
+  const duration=4000;
+  const totalTurns=4+Math.random()*2;
+  const finalOffset=Math.random()*Math.PI*2;
+  const totalAngle=totalTurns*Math.PI*2+finalOffset;
+  const start=performance.now();
+  lastPointerIndex=getSelectedIndex(startAngle);
+  lastPingTime=start;
 
-  const duration = 4000;
-  const totalTurns = 4 + Math.random()*2;
-  const finalOffset = Math.random() * Math.PI * 2;
-  const totalAngle = totalTurns * Math.PI*2 + finalOffset;
-  const start = performance.now();
-
-  // Initialise le dernier index en partant de la position courante
-  lastPointerIndex = getSelectedIndex(startAngle);
-  lastPingTime = start;
+  playSpinSound(); // 🔊 démarre le son de rotation
 
   function animate(ts){
-    const t = Math.min(1, (ts - start) / duration);
-    const eased = easeInOutCubic(t);
-
-    // --- ANIMATION CORRECTE : on part de startAngle (position actuelle)
-    angle = startAngle + eased * totalAngle;
+    const t=Math.min(1,(ts-start)/duration);
+    const eased=easeInOutCubic(t);
+    angle=startAngle + eased*totalAngle;
     drawWheel(angle);
 
-    // Segment crossing ping (throttled)
-    const idx = getSelectedIndex(angle);
-    if(idx !== lastPointerIndex && (ts - lastPingTime) > 25){
-      try { ping(); } catch(e) {}
-      lastPointerIndex = idx;
-      lastPingTime = ts;
+    const idx=getSelectedIndex(angle);
+    if(idx!==lastPointerIndex && (ts-lastPingTime)>25){
+      lastPointerIndex=idx;
+      lastPingTime=ts;
     }
 
     if(t<1){
       requestAnimationFrame(animate);
     }else{
-      const winnerIdx = getSelectedIndex(angle);
-      const chosen = ENTRIES[winnerIdx];
-      try { coin(); } catch(e) {}
-      showOverlay("🎯 " + chosen);
+      stopSpinSound(); // 🔇 stop son roue
+      const winnerIdx=getSelectedIndex(angle);
+      const chosen=ENTRIES[winnerIdx];
+      playCoinSound(); // 🔊 son pièce
+      showOverlay("🎯 "+chosen);
 
-      // normalise l'angle pour éviter accumulation (ramène dans [0,2π))
-      angle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      // normalise l'angle
+      angle=((angle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
 
-      // Remove winner (sans remise)
+      // supprime le gagnant
       ENTRIES.splice(winnerIdx,1);
-      colors = buildColors(ENTRIES.length);
+      colors=buildColors(ENTRIES.length);
       buildStaticWheel();
-      document.getElementById('countInfo').textContent = ENTRIES.length + " éléments restants";
+      document.getElementById('countInfo').textContent=ENTRIES.length+" éléments restants";
       drawWheel(angle);
-      btn.disabled = ENTRIES.length===0;
-      spinning = false;
+      btn.disabled=ENTRIES.length===0;
+      spinning=false;
     }
   }
   requestAnimationFrame(animate);
 }
 
-
-/* -------- Initialisation -------- */
+/* -------- Init -------- */
 document.getElementById('spinBtn').addEventListener('click',spin);
 colors=buildColors(ENTRIES.length);
 buildStaticWheel();
