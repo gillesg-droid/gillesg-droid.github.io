@@ -84,10 +84,18 @@ let lastPingTime = 0;
 
 /* -------- Fonctions utilitaires -------- */
 function buildColors(n){
+  // Palette de couleurs contrastées
+  const baseColors = [
+    "#f87171", // rouge clair
+    "#60a5fa", // bleu clair
+    "#facc15", // jaune
+    "#34d399", // vert
+    "#a78bfa", // violet
+    "#fb923c"  // orange
+  ];
   const arr = [];
   for(let i=0;i<n;i++){
-    const hue = (i*360/n)%360;
-    arr.push(`hsl(${hue}deg,88%,52%)`);
+    arr.push(baseColors[i % baseColors.length]); // alternance visible
   }
   return arr;
 }
