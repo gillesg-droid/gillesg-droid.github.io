@@ -23,17 +23,20 @@
   .legend{font-size:9px;opacity:.7;}
   .overlay{
     position:absolute;inset:0;display:none;align-items:center;justify-content:center;
-    z-index:2;
+    z-index:10;
   }
   .overlay .bubble{
-    position:relative;max-width:78%;padding:16px 18px;border-radius:12px;background:#111;color:#fff;
+    position:relative;max-width:78%;padding:16px 38px 16px 18px;border-radius:12px;background:#111;color:#fff;
     box-shadow:0 8px 24px rgba(0,0,0,.25);
-    font-size:clamp(16px,2.8vw,24px);font-weight:700;text-align:center;line-height:1.25;
+    font-size:clamp(16px,2.8vw,24px);font-weight:700;text-align:center;line-height:1.25;word-break: break-word;
   }
   .overlay .close{
     position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;
-    border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;
+    border: none;background:rgba(255,255,255,.08);color:#fff;
     display:grid;place-items:center;cursor:pointer;font-size:16px;line-height:1;
+  }
+  .overlay .close:hover {
+  background: rgba(255,255,255,0.25);
   }
 </style>
 </head>
