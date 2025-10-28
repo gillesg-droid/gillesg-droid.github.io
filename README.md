@@ -22,21 +22,21 @@
   button.primary:disabled{opacity:.5;cursor:not-allowed;}
   .legend{font-size:9px;opacity:.7;}
   .overlay{
-    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
-    z-index:10;
+    position: fixed;top:0;left:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);
+    z-index:9999;
   }
   .overlay .bubble{
-    position:relative;max-width:78%;padding:16px 38px 16px 18px;border-radius:12px;background:#111;color:#fff;
+    position:relative;max-width:80%;padding:20px 48px 20px 20px;border-radius:14px;background:#111;color:#fff;
     box-shadow:0 8px 24px rgba(0,0,0,.25);
-    font-size:clamp(16px,2.8vw,24px);font-weight:700;text-align:center;line-height:1.25;word-break: break-word;
+    font-size:clamp(16px,2.8vw,24px);font-weight:700;text-align:center;line-height:1.35;word-break: break-word;overflow-wrap: break-word;box-sizing: border-box;
   }
   .overlay .close{
-    position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;
+    position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
     border: none;background:rgba(255,255,255,.08);color:#fff;
-    display:grid;place-items:center;cursor:pointer;font-size:16px;line-height:1;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1;flex-shrink:0;transition:background .2s ease;
   }
   .overlay .close:hover {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.3);
   }
 </style>
 </head>
@@ -48,13 +48,15 @@
       <div class="wheel-area">
         <div class="pointer"></div>
         <canvas id="wheel" width="800" height="800"></canvas>
-        <div id="overlay" class="overlay">
-          <div class="bubble">
-            <div id="overlayText"></div>
-            <div id="overlayClose" class="close" title="Fermer">×</div>
-          </div>
+      </div>
+
+      <div id="overlay" class="overlay">
+        <div class="bubble">
+          <div id="overlayText"></div>
+          <button id="overlayClose" class="close" title="Fermer">×</button>
         </div>
       </div>
+      
       <div class="controls">
         <button id="spinBtn" class="primary">Tourner la roue</button>
         <span class="legend" id="countInfo"></span>
