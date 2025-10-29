@@ -2,41 +2,158 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Roue interactive – avec sons et couleurs alternées</title>
+<title>Roue interactive – version finale responsive</title>
 <style>
   :root { --bg:#f7f7f7; --fg:#111; --ring:#e5e7eb; }
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif;}
-  .wrap{min-height:100%;display:grid;place-items:center;padding:16px;}
-  .container{width:min(92vw,650px);display:grid;gap:10px;justify-items:center;}
-  h1{margin:0;font-size:clamp(14px,2.4vw,18px);font-weight:700;letter-spacing:.2px;}
-  .board{background:#fff;border:1px solid var(--ring);border-radius:10px;padding:10px;display:grid;gap:8px;justify-items:center;}
-  .wheel-area{position:relative;width:100%;display:grid;place-items:center;}
+
+  html,body{
+    margin:0;
+    height:100%;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:Helvetica,Arial,sans-serif;
+  }
+
+  /* 🧭 Structure principale */
+  .wrap{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+    padding-top:clamp(24px,6vh,80px);
+    padding-bottom:24px;
+    box-sizing:border-box;
+  }
+
+  .container{
+    width:100%;
+    max-width:650px;
+    display:grid;
+    gap:10px;
+    justify-items:center;
+    padding-inline:12px;
+  }
+
+  h1{
+    margin:0;
+    font-size:clamp(14px,2.4vw,18px);
+    font-weight:700;
+    letter-spacing:.2px;
+    text-align:center;
+  }
+
+  .board{
+    background:#fff;
+    border:1px solid var(--ring);
+    border-radius:10px;
+    padding:10px;
+    display:grid;
+    gap:8px;
+    justify-items:center;
+  }
+
+  .wheel-area{
+    position:relative;
+    width:100%;
+    display:grid;
+    place-items:center;
+  }
+
   .pointer{
-    position:absolute;top:-2px;left:50%;transform:translateX(-50%) rotate(180deg);
-    width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:20px solid #1f2937;
+    position:absolute;
+    top:-2px;
+    left:50%;
+    transform:translateX(-50%) rotate(180deg);
+    width:0;
+    height:0;
+    border-left:12px solid transparent;
+    border-right:12px solid transparent;
+    border-bottom:20px solid #1f2937;
     z-index:3;
   }
-  canvas{width:min(58vw,540px);max-width:540px;aspect-ratio:1/1;display:block;border-radius:50%;background:#fafafa;box-shadow:inset 0 0 0 5px #f0f0f0;}
-  .controls{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;}
-  button.primary{background:#111;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+
+  /* 🌀 Taille de la roue adaptative */
+  canvas{
+    width:clamp(250px,80vw,540px);
+    aspect-ratio:1/1;
+    display:block;
+    border-radius:50%;
+    background:#fafafa;
+    box-shadow:inset 0 0 0 5px #f0f0f0;
+  }
+
+  .controls{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  button.primary{
+    background:#111;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+  }
   button.primary:disabled{opacity:.5;cursor:not-allowed;}
+
   .legend{font-size:9px;opacity:.7;}
+
+  /* 🪩 Fenêtre du résultat */
   .overlay{
-    position: fixed;top:0;left:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.35);
     z-index:9999;
   }
+
   .overlay .bubble{
-    position:relative;max-width:80%;padding:20px 48px 20px 20px;border-radius:14px;background:#111;color:#fff;
+    position:relative;
+    max-width:80%;
+    padding:20px 48px 20px 20px;
+    border-radius:14px;
+    background:#111;
+    color:#fff;
     box-shadow:0 8px 24px rgba(0,0,0,.25);
-    font-size:clamp(16px,2.8vw,24px);font-weight:700;text-align:center;line-height:1.35;word-break: break-word;overflow-wrap: break-word;box-sizing: border-box;
+    font-size:clamp(16px,2.8vw,24px);
+    font-weight:700;
+    text-align:center;
+    line-height:1.35;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+    box-sizing:border-box;
   }
+
   .overlay .close{
-    position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
-    border: none;background:rgba(255,255,255,.08);color:#fff;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;line-height:1;flex-shrink:0;transition:background .2s ease;
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,0.15);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:20px;
+    line-height:1;
+    transition:background 0.2s ease;
   }
-  .overlay .close:hover {
-  background: rgba(255,255,255,0.3);
+
+  .overlay .close:hover{
+    background:rgba(255,255,255,0.3);
   }
 </style>
 </head>
@@ -50,18 +167,19 @@
         <canvas id="wheel" width="800" height="800"></canvas>
       </div>
 
-      <div id="overlay" class="overlay">
-        <div class="bubble">
-          <div id="overlayText"></div>
-          <button id="overlayClose" class="close" title="Fermer">×</button>
-        </div>
-      </div>
-      
       <div class="controls">
         <button id="spinBtn" class="primary">Tourner la roue</button>
         <span class="legend" id="countInfo"></span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 🔽 Fenêtre de résultat déplacée en dehors de .wheel-area -->
+<div id="overlay" class="overlay">
+  <div class="bubble">
+    <div id="overlayText"></div>
+    <button id="overlayClose" class="close" title="Fermer">×</button>
   </div>
 </div>
 
@@ -102,7 +220,6 @@ function buildColors(n){
   return arr;
 }
 
-/* -------- Font -------- */
 function computeFont(n){
   if(n>340) return 7;
   if(n>260) return 8;
@@ -164,7 +281,7 @@ function buildStaticWheel(){
   offctx.restore();
 }
 
-/* -------- Affichage -------- */
+/* -------- Dessin de la roue -------- */
 function drawWheel(a){
   ctx.clearRect(0,0,W,H);
   ctx.save();
@@ -196,7 +313,7 @@ function showOverlay(text){
 }
 overlayClose.addEventListener('click',()=>overlay.style.display='none');
 
-/* -------- Nouveaux sons -------- */
+/* -------- Sons -------- */
 let spinSound = new Audio("wheel-spin.mp3");
 let coinSound = new Audio("coin.mp3");
 spinSound.loop = true;
@@ -216,7 +333,7 @@ function playCoinSound(){
   coinSound.play().catch(()=>{});
 }
 
-/* -------- Animation du spin -------- */
+/* -------- Animation -------- */
 function spin(){
   if(spinning) return;
   if(ENTRIES.length===0){alert("Plus aucun élément à tirer.");return;}
@@ -224,7 +341,7 @@ function spin(){
   const btn=document.getElementById('spinBtn');
   btn.disabled=true;
 
-  const startAngle = angle; // point de départ réel
+  const startAngle = angle;
   const duration=4000;
   const totalTurns=4+Math.random()*2;
   const finalOffset=Math.random()*Math.PI*2;
@@ -233,7 +350,7 @@ function spin(){
   lastPointerIndex=getSelectedIndex(startAngle);
   lastPingTime=start;
 
-  playSpinSound(); // 🔊 démarre le son de rotation
+  playSpinSound();
 
   function animate(ts){
     const t=Math.min(1,(ts-start)/duration);
@@ -241,25 +358,16 @@ function spin(){
     angle=startAngle + eased*totalAngle;
     drawWheel(angle);
 
-    const idx=getSelectedIndex(angle);
-    if(idx!==lastPointerIndex && (ts-lastPingTime)>25){
-      lastPointerIndex=idx;
-      lastPingTime=ts;
-    }
-
     if(t<1){
       requestAnimationFrame(animate);
     }else{
-      stopSpinSound(); // 🔇 stop son roue
+      stopSpinSound();
       const winnerIdx=getSelectedIndex(angle);
       const chosen=ENTRIES[winnerIdx];
-      playCoinSound(); // 🔊 son pièce
+      playCoinSound();
       showOverlay("🎯 "+chosen);
 
-      // normalise l'angle
       angle=((angle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-
-      // supprime le gagnant
       ENTRIES.splice(winnerIdx,1);
       colors=buildColors(ENTRIES.length);
       buildStaticWheel();
@@ -272,7 +380,7 @@ function spin(){
   requestAnimationFrame(animate);
 }
 
-/* -------- Init -------- */
+/* -------- Initialisation -------- */
 document.getElementById('spinBtn').addEventListener('click',spin);
 colors=buildColors(ENTRIES.length);
 buildStaticWheel();
