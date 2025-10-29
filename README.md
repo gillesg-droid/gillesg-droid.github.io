@@ -350,6 +350,8 @@ function playCoinSound(){
   coinSound.play().catch(()=>{});
 }
 
+const SPIN_FADEOUT_DURATION = 1000; // durée du fondu (1 seconde)
+
 /* -------- Animation -------- */
 function spin(){
   if(spinning) return;
@@ -374,11 +376,20 @@ function spin(){
     const eased=easeInOutCubic(t);
     angle=startAngle + eased*totalAngle;
     drawWheel(angle);
+    
+    // 🔊 Gestion du fondu du son dans la dernière seconde
+    const remaining = duration - (ts - start);
+    if (remaining <= SPIN_FADEOUT_DURATION && spinSound.volume > 0) {
+      const fadeProgress = 1 - remaining / SPIN_FADEOUT_DURATION;
+      spinSound.volume = Math.max(0, 0.7 * (1 - fadeProgress));
+    }
 
     if(t<1){
       requestAnimationFrame(animate);
     }else{
+      // assure l’arrêt du son et remet le volume normal
       stopSpinSound();
+      spinSound.volume = 0.7;
       const winnerIdx=getSelectedIndex(angle);
       const chosen=ENTRIES[winnerIdx];
       playCoinSound();
