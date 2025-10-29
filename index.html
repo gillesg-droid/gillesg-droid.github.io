@@ -335,7 +335,7 @@ let spinSound = new Audio("wheel-spin.mp3");
 let coinSound = new Audio("coin.mp3");
 spinSound.loop = true;
 spinSound.volume = 0.7;
-coinSound.volume = 0.9;
+coinSound.volume = 0.7;
 
 function playSpinSound(){
   spinSound.currentTime = 0;
