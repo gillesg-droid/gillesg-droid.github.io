@@ -307,9 +307,26 @@ function easeInOutCubic(x){return x<0.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;}
 const overlay=document.getElementById('overlay');
 const overlayText=document.getElementById('overlayText');
 const overlayClose=document.getElementById('overlayClose');
-function showOverlay(text){
-  overlayText.textContent=text;
-  overlay.style.display='flex';
+function showOverlay(resultText){
+  // 🔹 Messages aléatoires pour varier la présentation
+  const intros = [
+    "🎯 Le sort a parlé !",
+    "✨ Voici le résultat du tirage :",
+    "🍀 Et le gagnant est…",
+    "🎡 Résultat de la roue :",
+    "🥳 C’est tombé sur :"
+  ];
+  const intro = intros[Math.floor(Math.random() * intros.length)];
+
+  // 🔹 Ajout d’un retour à la ligne avant certains mots-clés
+  let formatted = resultText
+    .replace(/(Recette\s*:)/gi, "\n$1")
+    .replace(/(Date de création\s*:)/gi, "\n$1");
+
+  // 🔹 Combine le tout et insère en HTML (pour gérer les <br>)
+  overlayText.innerHTML = `${intro}<br><br>${formatted.replace(/\n/g, "<br>")}`;
+
+  overlay.style.display = 'flex';
 }
 overlayClose.addEventListener('click',()=>overlay.style.display='none');
 
